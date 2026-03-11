@@ -1,0 +1,40 @@
+{
+  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "ES6",
+    "lib": ["ES2015"],
+    "moduleResolution": "node",
+    "preserveConstEnums": true,
+    "strictNullChecks": true,
+    "sourceMap": true,
+    "inlineSources": true,
+    "allowJs": true,
+    "outDir": "dist",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "removeComments": true,
+    "rootDir": "src",
+    "baseUrl": ".",
+    "paths": {
+      "@src/*": ["./src/*"],
+      "@domain/*": ["./src/@domain/*"],
+      "@application/*": ["./src/@application/*"],
+      "@infra/*": ["./src/@infra/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@logging/*": ["./src/logging/*"]
+    }
+  },
+  "include": ["./src"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",
+    "**/*.test.js",
+    "commitlint.config.js",
+    "prettier.config.js",
+    "__tests__",
+    "jest.config.js",
+    "eslint.config.ts"
+  ]
+}

@@ -8,6 +8,11 @@ export const makeExpressApplication = (): Express => {
   registerCorsExpress(app);
 
   /**
+   * Registering body parser.
+   */
+  app.use(express.json());
+
+  /**
    * Registering routes.
    */
   app.use(buildRoutes());

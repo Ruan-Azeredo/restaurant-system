@@ -11,6 +11,15 @@ const ProductModel = sequelize.define("products", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  price: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false,
+    defaultValue: 0,
+  },
   imgUrl: {
     type: DataTypes.STRING,
     allowNull: true,

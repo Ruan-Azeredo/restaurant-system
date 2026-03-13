@@ -25,7 +25,7 @@ const httpServer = http.createServer(app);
  */
 initSocketServer(httpServer);
 
-sequelize.sync().then(() => {
+sequelize.sync({ alter: true }).then(() => {
   /**
    * Starting order worker to listen out of queue.
    */

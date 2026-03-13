@@ -7,6 +7,7 @@ import { InputSequelizeRepository } from "@application/repositories/Input.sequel
 import { ProductInputSequelizeRepository } from "@application/repositories/ProductInput.sequelize";
 import { VerifyIngredientsService } from "@application/services/VerifyIngredients.service";
 import { CreateOrderUseCase } from "@application/usecases/order/CreateOrder.usecase";
+import { getIo } from "@src/@infra/http/socket/socketServer";
 
 const processOrderJob = async (job: Job<OrderJobPayload>) => {
   const { client_id, order_products } = job.data;
@@ -20,30 +21,45 @@ const processOrderJob = async (job: Job<OrderJobPayload>) => {
 
   const verifyIngredientsService = new VerifyIngredientsService(
     inputRepository,
-    productInputRepository
+    productInputRepository,
   );
 
   const createOrderUseCase = new CreateOrderUseCase(
     orderRepository,
     orderProductRepository,
-    verifyIngredientsService
+    verifyIngredientsService,
   );
 
+  const io = getIo();
+  const room = `order:${job.id}`;
+
   try {
-    const result = await createOrderUseCase.execute({ client_id, order_products });
+    const result = await createOrderUseCase.execute({
+      client_id,
+      order_products,
+    });
 
     console.log(
-      `[OrderWorker] Job ${job.id} completed. Order ID: ${result.order.id}`
+      `[OrderWorker] Job ${job.id} completed. Order ID: ${result.order.id}`,
     );
-    console.log(
-      `[OrderWorker] Ingredient summary:`,
-      JSON.stringify(result.ingredient_verification, null, 2)
-    );
+
+    io.to(room).emit("order-result", {
+      status: "confirmed",
+      order: result.order,
+      order_products: result.order_products,
+      ingredient_verification: result.ingredient_verification,
+    });
 
     return result;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`[OrderWorker] Job ${job.id} FAILED: ${message}`);
+
+    io.to(room).emit("order-result", {
+      status: "rejected",
+      reason: message,
+    });
+
     throw error; // Re-throw so BullMQ marks the job as failed
   }
 };
@@ -55,7 +71,7 @@ export const startOrderWorker = () => {
     {
       connection: redisConnectionOptions,
       concurrency: 1, // CRITICAL: ensures sequential processing to prevent race conditions
-    }
+    },
   );
 
   worker.on("completed", (job) => {
@@ -63,10 +79,15 @@ export const startOrderWorker = () => {
   });
 
   worker.on("failed", (job, err) => {
-    console.error(`[OrderWorker] Job ${job?.id} failed with error: ${err.message}`);
+    console.error(
+      `[OrderWorker] Job ${job?.id} failed with error: ${err.message}`,
+    );
   });
 
-  console.log("[OrderWorker] Worker started and listening on queue:", ORDER_QUEUE_NAME);
+  console.log(
+    "[OrderWorker] Worker started and listening on queue:",
+    ORDER_QUEUE_NAME,
+  );
 
   return worker;
 };

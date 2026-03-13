@@ -1,7 +1,9 @@
 import { makeExpressApplication } from "@infra/http/express/app";
 import dotenv from "dotenv";
+import http from "http";
 import sequelize from "@infra/database/sequelize/connection";
 import { startOrderWorker } from "@application/services/queue/OrderWorker";
+import { initSocketServer } from "@src/@infra/http/socket/socketServer";
 
 // Load all Sequelize schemas so that model associations are registered
 import "@infra/database/sequelize/schemas/clients.sequelize";
@@ -16,6 +18,12 @@ dotenv.config();
 const PORT = process.env.PORT || 3030;
 
 const app = makeExpressApplication();
+const httpServer = http.createServer(app);
+
+/**
+ * Attach Socket.IO to the HTTP server.
+ */
+initSocketServer(httpServer);
 
 sequelize.sync().then(() => {
   /**
@@ -26,7 +34,7 @@ sequelize.sync().then(() => {
   /**
    * Starting server.
    */
-  app.listen(PORT, () => {
+  httpServer.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });
 });

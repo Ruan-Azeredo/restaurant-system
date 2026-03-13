@@ -22,6 +22,7 @@
     "ioredis": "^5.10.0",
     "nodemon": "^3.1.14",
     "sequelize": "^6.37.8",
+    "socket.io": "^4.8.3",
     "sqlite3": "^5.1.7",
     "tsc-alias": "^1.8.16"
   },

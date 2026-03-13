@@ -1,10 +1,5 @@
 "use strict";
 
-require("ts-node").register({
-  compilerOptions: { module: "CommonJS", esModuleInterop: true },
-});
-require("tsconfig-paths").register();
-
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {

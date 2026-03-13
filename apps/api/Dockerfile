@@ -1,49 +1,64 @@
-# Use a smaller base image
+# ============================================================
+# Stage 1: builder — full source + all deps, builds dist/
+# ============================================================
 FROM node:24-alpine AS builder
 
-# Set working directory
 WORKDIR /app
 
-# # Copy only the essential files first for dependency installation
 COPY . .
 
-# Install git, pnpm, and husky globally
 RUN apk add --no-cache git
 
-# Install pnpm globally
 RUN corepack enable && corepack prepare pnpm@9 --activate
 
-# Set CI environment variable to true to prevent husky from running
 ENV CI=true
 ENV HUSKY_SKIP=1
 
-# Install dependencies
+# Install ALL dependencies (dev included — ts-node needed to build)
 RUN pnpm install
 
-# Build the API
-RUN pnpm run build --filter=agents/api
+# Build the API (outputs to dist/)
+RUN pnpm run build
 
-# Use pnpm deploy to create a self-contained directory with all dependencies
-# This properly handles pnpm workspace symlinks by copying actual files
-# --legacy flag is needed for pnpm v10+ without inject-workspace-packages
-RUN pnpm deploy --filter=agents/api --prod --legacy /app/deployed
+# ============================================================
+# Stage 2: migrate-runner — keeps src/ + ts-node for CLI tasks
+# Used by docker-compose migrate & seed services
+# ============================================================
+FROM node:24-alpine AS migrate-runner
 
-# ----------------------------------------------------------
+WORKDIR /app
 
-# Use a minimal runtime image to reduce size
+COPY . .
+
+RUN apk add --no-cache git
+
+RUN corepack enable && corepack prepare pnpm@9 --activate
+
+ENV CI=true
+ENV HUSKY_SKIP=1
+
+# Install ALL deps so ts-node, tsconfig-paths, sequelize-cli are available
+RUN pnpm install
+
+# Default CMD is overridden by docker-compose (migrate / seed)
+CMD ["pnpm", "run", "migrate"]
+
+# ============================================================
+# Stage 3: runtime — minimal production image
+# ============================================================
 FROM node:24-alpine
 
 ENV NODE_ENV=production
 
 WORKDIR /app
 
-# Copy the deployed directory which contains node_modules with real files (not symlinks)
-COPY --from=builder /app/deployed/node_modules ./node_modules
-COPY --from=builder /app/deployed/package.json ./package.json
-COPY --from=builder /app/apps/api/dist ./dist
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/package.json ./package.json
 
-# Expose port
-EXPOSE 8000
+RUN corepack enable && corepack prepare pnpm@9 --activate
+COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
+RUN pnpm install --prod --frozen-lockfile
 
-# Start the application with increased speed and reduced startup time
-CMD ["node", "--enable-source-maps", "--optimize_for_size", "--max_old_space_size=256", "./dist/bootstrap.js"]
+EXPOSE 3031
+
+CMD ["node", "dist/index.js"]

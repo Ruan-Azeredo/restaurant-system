@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { buildClientsRoutes } from "@infra/http/express/routes/client";
+import { buildProductsRoutes } from "@infra/http/express/routes/product";
 
 export const buildRoutes = (): Router => {
   const rootRouter = Router({ mergeParams: true });
@@ -14,6 +15,7 @@ export const buildRoutes = (): Router => {
    * Definitions of routes
    */
   v1Route.use("/client", buildClientsRoutes());
+  v1Route.use("/product", buildProductsRoutes());
 
   rootRouter.use("/v1", v1Route);
 

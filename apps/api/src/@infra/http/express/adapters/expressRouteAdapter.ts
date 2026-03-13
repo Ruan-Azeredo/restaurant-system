@@ -5,12 +5,7 @@ import { IController } from "@infra/controllers/index";
 export const adaptRoute = (controller: IController<any>) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const httpResponse = await controller.handle({
-        body: req.body,
-        params: req.params,
-        query: req.query,
-        headers: req.headers,
-      });
+      const httpResponse = await controller.handle(req, res);
 
       res.status(httpResponse.statusCode).json(httpResponse.body);
     } catch (error) {

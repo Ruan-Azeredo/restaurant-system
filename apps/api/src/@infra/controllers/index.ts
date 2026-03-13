@@ -1,9 +1,4 @@
-export interface IHttpRequest {
-  body?: Record<string, unknown>;
-  params?: Record<string, unknown>;
-  query?: Record<string, unknown>;
-  headers?: Record<string, unknown>;
-}
+import { Response, Request } from "express";
 
 export interface IHttpResponse<RESPONSE> {
   statusCode: number;
@@ -11,7 +6,10 @@ export interface IHttpResponse<RESPONSE> {
 }
 
 export abstract class IController<RESPONSE> {
-  abstract handle(request: IHttpRequest): Promise<IHttpResponse<RESPONSE>>;
+  abstract handle(
+    req: Request,
+    res: Response,
+  ): Promise<IHttpResponse<RESPONSE>>;
 }
 
 export default { IController };

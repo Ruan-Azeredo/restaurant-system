@@ -23,7 +23,8 @@
       "@infra/*": ["./src/@infra/*"],
       "@utils/*": ["./src/utils/*"],
       "@logging/*": ["./src/logging/*"]
-    }
+    },
+    "resolveJsonModule": true
   },
   "include": ["./src"],
   "exclude": [

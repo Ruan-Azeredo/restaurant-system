@@ -13,7 +13,7 @@ export const buildRoutes = (): Router => {
   /**
    * Definitions of routes
    */
-  v1Route.use("/client", buildClientsRoutes);
+  v1Route.use("/client", buildClientsRoutes());
 
   rootRouter.use("/v1", v1Route);
 

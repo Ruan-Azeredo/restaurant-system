@@ -1,5 +1,6 @@
 import { IClient } from "@application/entities/Client";
 import { IClientRepository } from "@application/repositories/Client.abstract";
+import ClientModel from "@src/@infra/database/sequelize/schemas/clients.sequelize";
 
 export class ClientSequelizeRepository implements IClientRepository {
   async create(client: IClient): Promise<IClient> {
@@ -15,6 +16,7 @@ export class ClientSequelizeRepository implements IClientRepository {
     throw new Error("Method not implemented.");
   }
   async findAll(): Promise<IClient[]> {
-    throw new Error("Method not implemented.");
+    const clients = await ClientModel.findAll();
+    return clients.map((client) => client.toJSON() as IClient);
   }
 }

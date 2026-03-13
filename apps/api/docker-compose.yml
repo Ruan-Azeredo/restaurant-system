@@ -1,0 +1,44 @@
+version: "3.9"
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+  db:
+    image: postgres:13
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: "postgres"
+      POSTGRES_HOST: "db"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+  migrate:
+    build: .
+    command: "pnpm run migrate"
+    depends_on:
+      - db
+  seed:
+    build: .
+    command: "pnpm run seed"
+    depends_on:
+      - db
+
+volumes:
+  db_data:
+
+# Run the following command to start the services:
+# docker compose up, docker compose up -d (detached mode)
+
+# stop the services:
+# docker compose down
+
+# --------------------------------------------
+
+# For current development, I suggest just run the db into docker, and run the web server locally.
+# To do that, you can run the following command:
+# ``` docker compose up db -d ```

@@ -74,7 +74,7 @@ class SocketService {
    */
   subscribeToOrder(
     jobId: string,
-    onResult: (data: OrderResultPayload) => void
+    onResult: (data: OrderResultPayload) => void,
   ): () => void {
     const socket = this.connect();
 
@@ -82,7 +82,10 @@ class SocketService {
     socket.emit("subscribe-order", { job_id: jobId });
 
     // Listen for the result
-    socket.on("order-result", onResult);
+    socket.on("order-result", (data: OrderResultPayload) => {
+      console.log("[Socket] Order result:", data);
+      onResult(data);
+    });
 
     // Return a cleanup function to remove the listener when done
     return () => {
@@ -99,13 +102,19 @@ class SocketService {
    */
   subscribeToStatusUpdates(
     orderId: string,
-    onUpdate: (data: { order_id: string; status: string }) => void
+    onUpdate: (data: { order_id: string; status: string }) => void,
   ): () => void {
     const socket = this.connect();
 
     socket.emit("subscribe-order", { job_id: orderId }); // Using job_id for room consistency
 
-    socket.on("order-status-updated", onUpdate);
+    socket.on(
+      "order-status-updated",
+      (data: { order_id: string; status: string }) => {
+        console.log("[Socket] Order status updated:", data);
+        onUpdate(data);
+      },
+    );
 
     return () => {
       socket.off("order-status-updated", onUpdate);

@@ -10,13 +10,13 @@ module.exports = {
 
     if (client) {
       await OrderModel.findOrCreate({
-        where: { client_id: client.id, status: "pending" },
+        where: { client_id: client.id, status: "client-order" },
       });
     }
   },
 
   async down(queryInterface, Sequelize) {
     const OrderModel = require("../schemas/orders.sequelize.ts").default;
-    await OrderModel.destroy({ where: { status: "pending" } });
+    await OrderModel.destroy({ where: { status: "client-order" } });
   },
 };

@@ -51,7 +51,7 @@ export function CartSheet({ open, onOpenChange, clientId }: CartSheetProps) {
 
   // Handle immediate clearing on confirmation
   useEffect(() => {
-    if (result?.status === "confirmed") {
+    if (result?.status === "confirm-order") {
       clearCart();
     }
   }, [result?.status, clearCart]);
@@ -124,12 +124,12 @@ export function CartSheet({ open, onOpenChange, clientId }: CartSheetProps) {
               <div
                 className={cn(
                   "p-6 rounded-full shadow-2xl",
-                  result.status === "confirmed"
+                  result.status === "confirm-order"
                     ? "bg-green-500/20 text-green-500 shadow-green-500/20"
                     : "bg-destructive/20 text-destructive shadow-destructive/20",
                 )}
               >
-                {result.status === "confirmed" ? (
+                {result.status === "confirm-order" ? (
                   <CheckCircle2 className="size-16 stroke-[2.5]" />
                 ) : (
                   <XCircle className="size-16 stroke-[2.5]" />
@@ -137,10 +137,10 @@ export function CartSheet({ open, onOpenChange, clientId }: CartSheetProps) {
               </div>
               <div className="space-y-3">
                 <h3 className="text-3xl font-black tracking-tight">
-                  {result.status === "confirmed" ? "Exquisite!" : "Apologies"}
+                  {result.status === "confirm-order" ? "Exquisite!" : "Apologies"}
                 </h3>
                 <p className="text-muted-foreground text-lg max-w-[280px]">
-                  {result.status === "confirmed"
+                  {result.status === "confirm-order"
                     ? "Your order has been acknowledged and is being prepared."
                     : (result.reason ??
                       "We encountered an issue. Please try again.")}
@@ -151,7 +151,7 @@ export function CartSheet({ open, onOpenChange, clientId }: CartSheetProps) {
                 className="w-full h-12 font-bold bg-white/5 border-white/10 hover:bg-white/10"
                 onClick={handleDismissResult}
               >
-                {result.status === "confirmed" ? "Perfect" : "Back to Cart"}
+                {result.status === "confirm-order" ? "Perfect" : "Back to Cart"}
               </Button>
             </div>
           ) : (

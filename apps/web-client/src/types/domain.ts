@@ -25,12 +25,12 @@ export interface OrderProduct {
 }
 
 export type OrderStatus =
-  | "pending"
-  | "processing"
-  | "confirmed"
-  | "rejected"
-  | "delivered"
-  | "cancelled";
+  | "client-order"
+  | "confirm-order"
+  | "failed"
+  | "production"
+  | "delivery"
+  | "delivered";
 
 export interface Order {
   id: string;

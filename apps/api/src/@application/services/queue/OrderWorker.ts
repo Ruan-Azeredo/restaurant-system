@@ -44,7 +44,7 @@ const processOrderJob = async (job: Job<OrderJobPayload>) => {
     );
 
     io.to(room).emit("order-result", {
-      status: "confirmed",
+      status: "confirm-order",
       order: result.order,
       order_products: result.order_products,
       ingredient_verification: result.ingredient_verification,
@@ -56,7 +56,7 @@ const processOrderJob = async (job: Job<OrderJobPayload>) => {
     console.error(`[OrderWorker] Job ${job.id} FAILED: ${message}`);
 
     io.to(room).emit("order-result", {
-      status: "rejected",
+      status: "failed",
       reason: message,
     });
 

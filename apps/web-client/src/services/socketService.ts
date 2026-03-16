@@ -4,7 +4,7 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3031";
 
 // Typed events the server can emit to the client
 export interface OrderResultPayload {
-  status: "confirmed" | "rejected";
+  status: "confirm-order" | "failed";
   // Populated on "confirmed"
   order?: {
     id: string;

@@ -38,48 +38,54 @@ const STATUS_CONFIG: Record<
     colorClass: string;
   }
 > = {
-  pending: {
-    label: "Awaiting Approval",
+  "client-order": {
+    label: "Sent to Kitchen",
     variant: "outline",
     icon: Clock,
     colorClass: "text-amber-500 bg-amber-500/10 border-amber-500/20",
   },
-  processing: {
-    label: "In Preparation",
+  "confirm-order": {
+    label: "Confirmed",
     variant: "secondary",
-    icon: RefreshCw,
+    icon: CheckCircle2,
     colorClass: "text-blue-500 bg-blue-500/10 border-blue-500/20",
   },
-  confirmed: {
-    label: "Confirmed",
+  production: {
+    label: "In Preparation",
     variant: "default",
+    icon: RefreshCw,
+    colorClass: "text-primary bg-primary/10 border-primary/20",
+  },
+  delivery: {
+    label: "Out for Delivery",
+    variant: "secondary",
+    icon: Package,
+    colorClass: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20",
+  },
+  delivered: {
+    label: "Arrived",
+    variant: "secondary",
     icon: CheckCircle2,
     colorClass: "text-green-500 bg-green-500/10 border-green-500/20",
   },
-  rejected: {
+  failed: {
     label: "Declined",
     variant: "destructive",
     icon: XCircle,
     colorClass: "text-red-500 bg-red-500/10 border-red-500/20",
   },
-  delivered: {
-    label: "Arrived",
-    variant: "secondary",
-    icon: Package,
-    colorClass: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20",
-  },
-  cancelled: {
-    label: "Cancelled",
-    variant: "outline",
-    icon: AlertCircle,
-    colorClass: "text-muted-foreground bg-muted/10 border-muted/20",
-  },
 };
 
-const ACTIVE_STATUSES = ["pending", "processing", "confirmed"];
+const ACTIVE_STATUSES = [
+  "client-order",
+  "confirm-order",
+  "production",
+  "delivery",
+];
 
 function OrderCard({ order }: { order: OrderResponse }) {
-  const config = STATUS_CONFIG[order.order_status] || STATUS_CONFIG.pending;
+  const config =
+    STATUS_CONFIG[order.order_status] || STATUS_CONFIG["client-order"];
   const Icon = config.icon;
 
   const dateStr = useMemo(() => {

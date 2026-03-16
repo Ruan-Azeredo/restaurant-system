@@ -91,24 +91,28 @@ class SocketService {
   }
 
   /**
-   * Subscribes to status updates for a specific order.
-   *
-   * @param orderId - The UUID of the order
-   * @param onUpdate - Callback that receives the status update
-   * @returns A cleanup function to unsubscribe
+   * Subscribes to ALL status updates (Admin Dashboard).
    */
-  subscribeToStatusUpdates(
-    orderId: string,
+  subscribeToAllStatusUpdates(
     onUpdate: (data: { order_id: string; status: string }) => void
   ): () => void {
     const socket = this.connect();
-
-    socket.emit("subscribe-order", { job_id: orderId }); // Using job_id for room consistency
-
     socket.on("order-status-updated", onUpdate);
-
     return () => {
       socket.off("order-status-updated", onUpdate);
+    };
+  }
+
+  /**
+   * Subscribes to NEW order notifications.
+   */
+  subscribeToNewOrders(
+    onCreated: (order: any) => void
+  ): () => void {
+    const socket = this.connect();
+    socket.on("order-created", onCreated);
+    return () => {
+      socket.off("order-created", onCreated);
     };
   }
 

@@ -16,7 +16,24 @@ export class OrderSequelizeRepository implements IOrderRepository {
   async findByClientId(client_id: string): Promise<IOrder[]> {
     const orders = await OrderModel.findAll({
       where: { client_id },
+      order: [["createdAt", "DESC"]],
     });
     return orders.map((order) => order.toJSON() as IOrder);
+  }
+
+  async findAll(): Promise<IOrder[]> {
+    const orders = await OrderModel.findAll({
+      order: [["createdAt", "DESC"]],
+    });
+    return orders.map((order) => order.toJSON() as IOrder);
+  }
+
+  async updateStatus(id: string, status: string): Promise<IOrder> {
+    const order = await OrderModel.findByPk(id);
+    if (!order) {
+      throw new Error("Order not found");
+    }
+    await order.update({ status });
+    return order.toJSON() as IOrder;
   }
 }

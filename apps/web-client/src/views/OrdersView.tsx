@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { api } from "@/services/api";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { socketService } from "@/services/socketService";
 import {
   Card,
   CardContent,
@@ -17,7 +18,6 @@ import {
   Package,
   Clock,
   CheckCircle2,
-  AlertCircle,
   Receipt,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -259,6 +259,26 @@ export function OrdersView({ clientId }: OrdersViewProps) {
     load();
   }, [load]);
 
+  // Real-time status updates
+  useEffect(() => {
+    if (!clientId || orders.length === 0) return;
+
+    const unsubs = orders.map((order) => {
+      return socketService.subscribeToStatusUpdates(
+        order.order_id,
+        ({ order_id, status }) => {
+          setOrders((current) =>
+            current.map((o) =>
+              o.order_id === order_id ? { ...o, order_status: status as any } : o
+            )
+          );
+        }
+      );
+    });
+
+    return () => unsubs.forEach((unsub) => unsub());
+  }, [clientId, orders.length]); // We only re-subscribe if the number of orders changes
+
   const activeOrders = useMemo(
     () =>
       orders.filter((o) =>
@@ -302,21 +322,6 @@ export function OrdersView({ clientId }: OrdersViewProps) {
               Follow your culinary journey from the kitchen to your table.
             </p>
           </div>
-          <Button
-            variant="outline"
-            onClick={load}
-            disabled={loading || !clientId}
-            className="group gap-3 font-black text-xs uppercase tracking-widest bg-white/5 backdrop-blur-xl border-white/10 hover:bg-white/10 hover:border-white/20 shadow-2xl transition-all active:scale-95"
-          >
-            <RefreshCw
-              className={cn(
-                "size-4 transition-transform duration-500",
-                loading && "animate-spin",
-                !loading && "group-hover:rotate-180",
-              )}
-            />
-            Sync Order Status
-          </Button>
         </div>
 
         {!clientId ? (

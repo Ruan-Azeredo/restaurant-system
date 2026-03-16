@@ -26,7 +26,7 @@ import { cn } from "@/lib/utils";
 // Extract types from the API service
 type OrderResponse = Awaited<ReturnType<typeof api.getOrdersByClient>>[number];
 type OrdersViewProps = {
-  clientId: string;
+  clientId: string | null;
 };
 
 const STATUS_CONFIG: Record<
@@ -269,10 +269,12 @@ export function OrdersView({ clientId }: OrdersViewProps) {
         ({ order_id, status }) => {
           setOrders((current) =>
             current.map((o) =>
-              o.order_id === order_id ? { ...o, order_status: status as any } : o
-            )
+              o.order_id === order_id
+                ? { ...o, order_status: status as any }
+                : o,
+            ),
           );
-        }
+        },
       );
     });
 

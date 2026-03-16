@@ -59,10 +59,13 @@ export function CartSheet({ open, onOpenChange, clientId }: CartSheetProps) {
 
   // Subscribe to orders that were sent via the offline queue
   useEffect(() => {
-    return offlineOrderQueue.onOrderSent((jobId) => {
+    const unsubscribe = offlineOrderQueue.onOrderSent((jobId) => {
       subscribe(jobId);
       setPlacing(true); // Show progress again if we're waiting for a socket result
     });
+    return () => {
+      unsubscribe();
+    };
   }, [subscribe]);
 
   const handlePlaceOrder = useCallback(async () => {

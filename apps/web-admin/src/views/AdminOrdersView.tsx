@@ -10,9 +10,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
-  ClipboardList,
   RefreshCw,
   XCircle,
   Package,
@@ -213,22 +211,25 @@ export function AdminOrdersView() {
 
   // Real-time status updates (Admin Global)
   useEffect(() => {
-    const unsubStatus = socketService.subscribeToAllStatusUpdates(({ order_id, status }) => {
-      setOrders((current) =>
-        current.map((o) =>
-          o.order_id === order_id ? { ...o, order_status: status as any } : o
-        )
-      );
-    });
+    const unsubStatus = socketService.subscribeToAllStatusUpdates(
+      ({ order_id, status }) => {
+        setOrders((current) =>
+          current.map((o) =>
+            o.order_id === order_id ? { ...o, order_status: status as any } : o,
+          ),
+        );
+      },
+    );
 
     const unsubCreated = socketService.subscribeToNewOrders((newOrder) => {
       setOrders((current) => {
         // Prevent duplicates
-        if (current.some(o => o.order_id === newOrder.order_id)) return current;
+        if (current.some((o) => o.order_id === newOrder.order_id))
+          return current;
         return [newOrder, ...current];
       });
       toast.info(`New Order Rocketed In! #${newOrder.order_id.slice(0, 8)}`, {
-        icon: "🚀"
+        icon: "🚀",
       });
     });
 

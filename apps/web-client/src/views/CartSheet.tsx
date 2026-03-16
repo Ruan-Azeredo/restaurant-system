@@ -145,6 +145,48 @@ export function CartSheet({ open, onOpenChange, clientId }: CartSheetProps) {
                     : (result.reason ??
                       "We encountered an issue. Please try again.")}
                 </p>
+
+                {result.status === "failed" &&
+                  result.ingredient_verification &&
+                  result.ingredient_verification.some((v) => !v.is_sufficient) && (
+                    <div className="mt-6 w-full max-w-[320px] bg-destructive/5 border border-destructive/10 rounded-2xl p-4 text-left animate-in slide-in-from-bottom-4 duration-700">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-destructive/60 mb-3 ml-1">
+                        Missing Ingredients
+                      </p>
+                      <div className="space-y-3">
+                        {result.ingredient_verification
+                          .filter((v) => !v.is_sufficient)
+                          .map((v) => (
+                            <div key={v.input_id} className="flex flex-col gap-1">
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm font-bold text-foreground">
+                                  {v.input_name}
+                                </span>
+                                <Badge
+                                  variant="outline"
+                                  className="text-[10px] bg-destructive/10 text-destructive border-none font-bold"
+                                >
+                                  -{v.required_quantity - v.stock_quantity_before}
+                                </Badge>
+                              </div>
+                              <div className="flex items-center gap-2 overflow-hidden">
+                                <div className="flex-1 h-1.5 bg-destructive/10 rounded-full">
+                                  <div
+                                    className="h-full bg-destructive rounded-full"
+                                    style={{
+                                      width: `${Math.min(100, (v.stock_quantity_before / v.required_quantity) * 100)}%`,
+                                    }}
+                                  />
+                                </div>
+                                <span className="text-[10px] font-medium text-muted-foreground/60 tabular-nums">
+                                  {v.stock_quantity_before}/{v.required_quantity}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  )}
               </div>
               <Button
                 variant="outline"

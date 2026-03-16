@@ -37,7 +37,9 @@ export class CreateOrderUseCase {
       await this.verifyIngredientsService.execute(order_products);
 
     if (!ingredientVerification.can_fulfill) {
-      throw new Error("Insufficient ingredients to fulfill the order.");
+      throw new Error("Insufficient ingredients to fulfill the order.", {
+        cause: ingredientVerification.details,
+      });
     }
 
     // 2. Create the base order with "client-order" status

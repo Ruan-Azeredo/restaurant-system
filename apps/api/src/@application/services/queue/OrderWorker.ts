@@ -89,10 +89,18 @@ const processOrderJob = async (job: Job<OrderJobPayload>) => {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`[OrderWorker] Job ${job.id} FAILED: ${message}`);
 
-    io.to(room).emit("order-result", {
+    const result = {
       status: "failed",
       reason: message,
-    });
+      ingredient_verification:
+        error instanceof Error &&
+        error.cause &&
+        Array.isArray(error.cause)
+          ? error.cause
+          : undefined,
+    };
+
+    io.to(room).emit("order-result", result);
 
     throw error; // Re-throw so BullMQ marks the job as failed
   }

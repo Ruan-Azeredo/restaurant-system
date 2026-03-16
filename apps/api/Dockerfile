@@ -6,10 +6,8 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@9 --activate
 
-# Como o contexto do Coolify agora é a raiz, isso copia o monorepo inteiro
 COPY . .
 
-# Isola os pacotes. SUBSTITUA "api" pelo nome do seu app no package.json!
 RUN pnpm dlx turbo prune api --docker
 
 # ============================================================
@@ -18,7 +16,9 @@ RUN pnpm dlx turbo prune api --docker
 FROM node:24-alpine AS builder
 WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@9 --activate
-RUN apk add --no-cache git
+
+# ADICIONADO: python3, make e g++ para o node-gyp conseguir compilar pacotes nativos
+RUN apk add --no-cache git python3 make g++
 
 # Copia os arquivos de lock isolados pelo prune
 COPY --from=pruner /app/out/json/ .
@@ -40,7 +40,8 @@ RUN pnpm turbo run build --filter=api
 FROM node:24-alpine AS migrate-runner
 WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@9 --activate
-RUN apk add --no-cache git
+# ADICIONADO: pacotes de compilação aqui também por segurança
+RUN apk add --no-cache git python3 make g++
 
 ENV CI=true
 ENV HUSKY_SKIP=1
@@ -64,10 +65,11 @@ RUN corepack enable && corepack prepare pnpm@9 --activate
 COPY --from=pruner /app/out/json/ .
 COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
 
-# 2. Instala APENAS dependências de produção, respeitando o formato de workspace
-RUN pnpm install --prod --frozen-lockfile
+# Instala as ferramentas, compila as libs e remove as ferramentas logo em seguida
+RUN apk add --no-cache python3 make g++ && \
+    pnpm install --prod --frozen-lockfile && \
+    apk del python3 make g++
 
-# 3. Copia o código compilado (dist) exatamente para onde ele deveria estar
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
 
 # 4. Muda o foco do terminal para dentro da pasta da API

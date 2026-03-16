@@ -65,14 +65,17 @@ RUN corepack enable && corepack prepare pnpm@9 --activate
 COPY --from=pruner /app/out/json/ .
 COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
 
-# Instala as ferramentas, compila as libs e remove as ferramentas logo em seguida
+# TIP to not explode memory: Copiar o dist do builder AQUI em cima.
+# Isso FORÇA o Docker a esperar o Stage 2 terminar completamente
+# antes de estrangular a rede baixando pacotes de produção.
+COPY --from=builder /app/apps/api/dist ./apps/api/dist
+
+# 2. Instala as ferramentas, compila as libs e remove as ferramentas logo em seguida
 RUN apk add --no-cache python3 make g++ && \
     pnpm install --prod --frozen-lockfile && \
     apk del python3 make g++
 
-COPY --from=builder /app/apps/api/dist ./apps/api/dist
-
-# 4. Muda o foco do terminal para dentro da pasta da API
+# 3. Muda o foco do terminal para dentro da pasta da API
 WORKDIR /app/apps/api
 
 EXPOSE 3031

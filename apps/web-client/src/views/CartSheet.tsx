@@ -32,7 +32,14 @@ interface CartSheetProps {
 }
 
 export function CartSheet({ open, onOpenChange, clientId }: CartSheetProps) {
-  const { items, totalItems, totalPrice, removeFromCart, updateQuantity, clearCart } = useCart();
+  const {
+    items,
+    totalItems,
+    totalPrice,
+    removeFromCart,
+    updateQuantity,
+    clearCart,
+  } = useCart();
   const { isWaiting, subscribe, result, reset } = useOrderSocket();
   const [placing, setPlacing] = useState(false);
 
@@ -79,7 +86,10 @@ export function CartSheet({ open, onOpenChange, clientId }: CartSheetProps) {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-md flex flex-col p-0 border-l border-white/10 bg-card/95 backdrop-blur-2xl">
+      <SheetContent
+        side="right"
+        className="w-full sm:max-w-md flex flex-col p-0 border-l border-white/10 bg-card/95 backdrop-blur-2xl"
+      >
         <SheetHeader className="px-8 pt-10 pb-6 space-y-1">
           <div className="flex items-center justify-between">
             <SheetTitle className="text-3xl font-black tracking-tighter flex items-center gap-3">
@@ -87,13 +97,15 @@ export function CartSheet({ open, onOpenChange, clientId }: CartSheetProps) {
               Cart
             </SheetTitle>
             {totalItems > 0 && (
-              <Badge className="rounded-full bg-primary/10 text-primary border-none font-bold px-3">
+              <Badge className="bg-primary/10 text-primary border-none font-bold px-3">
                 {totalItems} items
               </Badge>
             )}
           </div>
           <SheetDescription className="text-base font-medium text-muted-foreground/80">
-            {items.length === 0 ? "Your epicurean journey starts here." : "Refine your selection before we begin."}
+            {items.length === 0
+              ? "Your epicurean journey starts here."
+              : "Refine your selection before we begin."}
           </SheetDescription>
         </SheetHeader>
 
@@ -103,10 +115,14 @@ export function CartSheet({ open, onOpenChange, clientId }: CartSheetProps) {
           {/* Order result overlay */}
           {result ? (
             <div className="flex-1 flex flex-col items-center justify-center gap-8 py-12 text-center animate-in zoom-in-95 duration-500">
-              <div className={cn(
-                "p-6 rounded-full shadow-2xl",
-                result.status === "confirmed" ? "bg-green-500/20 text-green-500 shadow-green-500/20" : "bg-destructive/20 text-destructive shadow-destructive/20"
-              )}>
+              <div
+                className={cn(
+                  "p-6 rounded-full shadow-2xl",
+                  result.status === "confirmed"
+                    ? "bg-green-500/20 text-green-500 shadow-green-500/20"
+                    : "bg-destructive/20 text-destructive shadow-destructive/20",
+                )}
+              >
                 {result.status === "confirmed" ? (
                   <CheckCircle2 className="size-16 stroke-[2.5]" />
                 ) : (
@@ -118,14 +134,15 @@ export function CartSheet({ open, onOpenChange, clientId }: CartSheetProps) {
                   {result.status === "confirmed" ? "Exquisite!" : "Apologies"}
                 </h3>
                 <p className="text-muted-foreground text-lg max-w-[280px]">
-                  {result.status === "confirmed" 
-                    ? "Your order has been acknowledged and is being prepared." 
-                    : (result.reason ?? "We encountered an issue. Please try again.")}
+                  {result.status === "confirmed"
+                    ? "Your order has been acknowledged and is being prepared."
+                    : (result.reason ??
+                      "We encountered an issue. Please try again.")}
                 </p>
               </div>
-              <Button 
-                variant="outline" 
-                className="w-full rounded-full h-12 font-bold bg-white/5 border-white/10 hover:bg-white/10" 
+              <Button
+                variant="outline"
+                className="w-full h-12 font-bold bg-white/5 border-white/10 hover:bg-white/10"
                 onClick={handleDismissResult}
               >
                 {result.status === "confirmed" ? "Perfect" : "Back to Cart"}
@@ -139,12 +156,17 @@ export function CartSheet({ open, onOpenChange, clientId }: CartSheetProps) {
                     <div className="p-8 rounded-full bg-muted/20">
                       <ShoppingCart className="size-12 text-muted-foreground/30" />
                     </div>
-                    <p className="text-muted-foreground font-medium text-lg">Your cart is feeling a bit light.</p>
+                    <p className="text-muted-foreground font-medium text-lg">
+                      Your cart is feeling a bit light.
+                    </p>
                   </div>
                 ) : (
                   <div className="py-6 space-y-8">
                     {items.map((item) => (
-                      <div key={item.product.id} className="group relative flex gap-5 items-center">
+                      <div
+                        key={item.product.id}
+                        className="group relative flex gap-5 items-center"
+                      >
                         <div className="flex-1 min-w-0 space-y-1">
                           <h4 className="font-bold text-lg leading-tight group-hover:text-primary transition-colors">
                             {item.product.name}
@@ -161,13 +183,15 @@ export function CartSheet({ open, onOpenChange, clientId }: CartSheetProps) {
                             </span>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center bg-muted/30 rounded-full p-1 border border-white/5">
                           <Button
                             variant="ghost"
                             size="icon-xs"
                             className="rounded-full hover:bg-background/80"
-                            onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                            onClick={() =>
+                              updateQuantity(item.product.id, item.quantity - 1)
+                            }
                           >
                             <Minus className="size-3.5" />
                           </Button>
@@ -178,7 +202,9 @@ export function CartSheet({ open, onOpenChange, clientId }: CartSheetProps) {
                             variant="ghost"
                             size="icon-xs"
                             className="rounded-full hover:bg-background/80"
-                            onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                            onClick={() =>
+                              updateQuantity(item.product.id, item.quantity + 1)
+                            }
                           >
                             <Plus className="size-3.5" />
                           </Button>
@@ -201,7 +227,9 @@ export function CartSheet({ open, onOpenChange, clientId }: CartSheetProps) {
               {items.length > 0 && (
                 <div className="py-8 space-y-6">
                   <div className="flex items-center justify-between">
-                    <span className="text-lg font-medium text-muted-foreground">Investment</span>
+                    <span className="text-lg font-medium text-muted-foreground">
+                      Investment
+                    </span>
                     <span className="text-3xl font-black tracking-tighter text-foreground">
                       {new Intl.NumberFormat("pt-BR", {
                         style: "currency",
@@ -209,10 +237,10 @@ export function CartSheet({ open, onOpenChange, clientId }: CartSheetProps) {
                       }).format(totalPrice)}
                     </span>
                   </div>
-                  
+
                   <div className="space-y-3">
                     <Button
-                      className="w-full rounded-full h-14 text-lg font-black shadow-2xl shadow-primary/30 transition-all hover:translate-y-[-2px] active:translate-y-[0px] active:scale-[0.98]"
+                      className="w-full h-14 text-lg font-black shadow-2xl shadow-primary/30 transition-all hover:translate-y-[-2px] active:translate-y-[0px] active:scale-[0.98]"
                       onClick={handlePlaceOrder}
                       disabled={isLoading}
                     >
@@ -227,7 +255,7 @@ export function CartSheet({ open, onOpenChange, clientId }: CartSheetProps) {
                     </Button>
                     <Button
                       variant="ghost"
-                      className="w-full rounded-full text-muted-foreground font-bold hover:bg-destructive/5 hover:text-destructive transition-colors"
+                      className="w-full text-muted-foreground font-bold hover:bg-destructive/5 hover:text-destructive transition-colors"
                       onClick={clearCart}
                       disabled={isLoading}
                     >

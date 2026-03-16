@@ -54,24 +54,6 @@ export function CatalogView() {
     }, 1500);
   };
 
-  // Helper to get a premium image based on product name or fallback
-  const getProductImage = (name: string) => {
-    const n = name.toLowerCase();
-    if (n.includes("burger"))
-      return "/Users/ruanazeredo/.gemini/antigravity/brain/f0452640-5d96-4a8c-9e5d-1d04a6dfb71a/gourmet_burger_1773436795724.png";
-    if (n.includes("pasta") || n.includes("spaghetti"))
-      return "/Users/ruanazeredo/.gemini/antigravity/brain/f0452640-5d96-4a8c-9e5d-1d04a6dfb71a/fresh_pasta_1773436809671.png";
-    if (n.includes("cake") || n.includes("dessert"))
-      return "/Users/ruanazeredo/.gemini/antigravity/brain/f0452640-5d96-4a8c-9e5d-1d04a6dfb71a/chocolate_cake_1773436824302.png";
-    // Default/Cycle fallback
-    const fallbacks = [
-      "/Users/ruanazeredo/.gemini/antigravity/brain/f0452640-5d96-4a8c-9e5d-1d04a6dfb71a/gourmet_burger_1773436795724.png",
-      "/Users/ruanazeredo/.gemini/antigravity/brain/f0452640-5d96-4a8c-9e5d-1d04a6dfb71a/fresh_pasta_1773436809671.png",
-      "/Users/ruanazeredo/.gemini/antigravity/brain/f0452640-5d96-4a8c-9e5d-1d04a6dfb71a/chocolate_cake_1773436824302.png",
-    ];
-    return fallbacks[Math.abs(name.length % fallbacks.length)];
-  };
-
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-6 text-center animate-in fade-in duration-500">
@@ -86,7 +68,7 @@ export function CatalogView() {
             {error}
           </p>
         </div>
-        <Button variant="outline" onClick={load} className="rounded-full px-8">
+        <Button variant="outline" onClick={load} className="px-8">
           Try again
         </Button>
       </div>
@@ -180,7 +162,7 @@ export function CatalogView() {
                   <CardFooter className="p-5 pt-3">
                     <Button
                       className={cn(
-                        "w-full gap-2 rounded-full font-bold h-11 transition-all",
+                        "w-full gap-2 font-bold h-11 transition-all cursor-pointer",
                         added
                           ? "bg-green-600 hover:bg-green-600 scale-95"
                           : "shadow-lg shadow-primary/20",

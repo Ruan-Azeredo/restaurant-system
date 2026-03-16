@@ -58,3 +58,12 @@ volumes:
 # For current development, I suggest just run the db into docker, and run the web server locally.
 # To do that, you can run the following command:
 # ``` docker compose up db -d ```
+
+# maybe we dont need to run the migrate and seed services, the indication for development is just up redis and db
+# and run the the server in turbo, to run front and backend
+
+# ```
+# ./apps/api -> docker-compose up redis db
+#
+# ./ -> pnpm run dev
+# ```

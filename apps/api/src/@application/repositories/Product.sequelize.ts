@@ -11,4 +11,13 @@ export class ProductSequelizeRepository implements IProductRepository {
     });
     return products.map((product) => product.toJSON() as IProduct);
   }
+
+  async findByIds(ids: string[]): Promise<IProduct[]> {
+    const products = await ProductModel.findAll({
+      where: {
+        id: ids,
+      },
+    });
+    return products.map((product) => product.toJSON() as IProduct);
+  }
 }

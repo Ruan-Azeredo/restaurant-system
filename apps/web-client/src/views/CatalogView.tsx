@@ -76,7 +76,7 @@ export function CatalogView() {
   }
 
   return (
-    <div className="px-6 py-10 max-w-7xl mx-auto w-full space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="relative px-6 py-16 max-w-6xl mx-auto w-full space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-1000">
       <div className="space-y-1">
         <h1 className="text-4xl font-bold tracking-tight text-foreground">
           Menu

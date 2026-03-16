@@ -16,4 +16,11 @@ export class OrderProductSequelizeRepository implements IOrderProductRepository 
     );
     return createdProducts.map((p) => p.toJSON() as IOrderProduct);
   }
+
+  async findByOrderId(order_id: string): Promise<IOrderProduct[]> {
+    const products = await OrderProductModel.findAll({
+      where: { order_id },
+    });
+    return products.map((p) => p.toJSON() as IOrderProduct);
+  }
 }

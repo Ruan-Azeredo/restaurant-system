@@ -1,4 +1,4 @@
-import type { Order, Product, Client } from "@/types/domain";
+import type { Product, Client } from "@/types/domain";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3031";
 
@@ -26,7 +26,19 @@ export const api = {
   },
 
   /** Fetch orders for a specific client */
-  getOrdersByClient(clientId: string): Promise<{ orders: Order[] }> {
+  getOrdersByClient(clientId: string): Promise<{
+    order_id: string;
+    order_status: string;
+    order_createdAt: string;
+    order_products: {
+      product_id: string;
+      product_name: string;
+      product_quantity: number;
+      product_description: string | null;
+      product_observation: string | null;
+      product_imgUrl: string | null;
+    }[];
+  }[]> {
     return apiFetch(`/v1/order?client_id=${clientId}`);
   },
 

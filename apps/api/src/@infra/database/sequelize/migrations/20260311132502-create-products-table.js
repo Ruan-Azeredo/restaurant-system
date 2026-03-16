@@ -17,6 +17,14 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: true,
       },
+      description: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      price: {
+        type: Sequelize.FLOAT,
+        allowNull: false,
+      },
       available: {
         type: Sequelize.BOOLEAN,
         defaultValue: true,

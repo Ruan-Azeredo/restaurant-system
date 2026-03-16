@@ -9,9 +9,8 @@ module.exports = {
     const client = await ClientModel.findOne({ where: { name: "John Doe" } });
 
     if (client) {
-      await OrderModel.create({
-        client_id: client.id,
-        status: "pending",
+      await OrderModel.findOrCreate({
+        where: { client_id: client.id, status: "pending" },
       });
     }
   },

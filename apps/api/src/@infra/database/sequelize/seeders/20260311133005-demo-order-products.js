@@ -11,11 +11,12 @@ module.exports = {
     const product = await ProductModel.findOne({ where: { name: "Cake" } });
 
     if (order && product) {
-      await OrderProductModel.create({
-        order_id: order.id,
-        product_id: product.id,
-        quantity: 2,
-        observation: "Extra frosting please",
+      await OrderProductModel.findOrCreate({
+        where: { order_id: order.id, product_id: product.id },
+        defaults: {
+          quantity: 2,
+          observation: "Extra frosting please",
+        }
       });
     }
   },

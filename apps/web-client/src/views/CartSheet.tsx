@@ -23,6 +23,11 @@ import {
   XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 
 interface CartSheetProps {
@@ -38,6 +43,7 @@ export function CartSheet({ open, onOpenChange, clientId }: CartSheetProps) {
     totalPrice,
     removeFromCart,
     updateQuantity,
+    updateObservation,
     clearCart,
   } = useCart();
   const { isWaiting, subscribe, result, reset } = useOrderSocket();
@@ -165,59 +171,86 @@ export function CartSheet({ open, onOpenChange, clientId }: CartSheetProps) {
                     {items.map((item) => (
                       <div
                         key={item.product.id}
-                        className="group relative flex gap-5 items-center"
+                        className="group relative flex flex-col gap-4 mb-6 pb-6 border-b border-white/5 last:border-0"
                       >
-                        <div className="flex-1 min-w-0 space-y-1">
-                          <h4 className="font-bold text-lg leading-tight group-hover:text-primary transition-colors">
-                            {item.product.name}
-                          </h4>
-                          <div className="flex items-center gap-3">
-                            <p className="text-primary font-bold">
-                              {new Intl.NumberFormat("pt-BR", {
-                                style: "currency",
-                                currency: "BRL",
-                              }).format(Number(item.product.price))}
-                            </p>
-                            <span className="text-muted-foreground/40 text-xs font-black uppercase tracking-widest">
-                              Quantity: {item.quantity}
-                            </span>
+                        <div className="flex gap-5 items-start">
+                          <div className="flex-1 min-w-0 space-y-1">
+                            <h4 className="font-bold text-lg leading-tight group-hover:text-primary transition-colors">
+                              {item.product.name}
+                            </h4>
+                            <div className="flex items-center gap-3">
+                              <p className="text-primary font-bold">
+                                {new Intl.NumberFormat("pt-BR", {
+                                  style: "currency",
+                                  currency: "BRL",
+                                }).format(Number(item.product.price))}
+                              </p>
+                              <span className="text-muted-foreground/40 text-xs font-black uppercase tracking-widest">
+                                Quantity: {item.quantity}
+                              </span>
+                            </div>
                           </div>
-                        </div>
 
-                        <div className="flex items-center bg-muted/30 rounded-full p-1 border border-white/5">
+                          <div className="flex items-center bg-muted/30 rounded-full p-1 border border-white/5">
+                            <Button
+                              variant="ghost"
+                              size="icon-xs"
+                              className="rounded-full hover:bg-background/80"
+                              onClick={() =>
+                                updateQuantity(item.product.id, item.quantity - 1)
+                              }
+                            >
+                              <Minus className="size-3.5" />
+                            </Button>
+                            <span className="text-sm font-black w-8 text-center tabular-nums">
+                              {item.quantity}
+                            </span>
+                            <Button
+                              variant="ghost"
+                              size="icon-xs"
+                              className="rounded-full hover:bg-background/80"
+                              onClick={() =>
+                                updateQuantity(item.product.id, item.quantity + 1)
+                              }
+                            >
+                              <Plus className="size-3.5" />
+                            </Button>
+                          </div>
+
                           <Button
                             variant="ghost"
                             size="icon-xs"
-                            className="rounded-full hover:bg-background/80"
-                            onClick={() =>
-                              updateQuantity(item.product.id, item.quantity - 1)
-                            }
+                            className="text-muted-foreground/30 hover:text-destructive hover:bg-destructive/10 transition-all"
+                            onClick={() => removeFromCart(item.product.id)}
                           >
-                            <Minus className="size-3.5" />
-                          </Button>
-                          <span className="text-sm font-black w-8 text-center tabular-nums">
-                            {item.quantity}
-                          </span>
-                          <Button
-                            variant="ghost"
-                            size="icon-xs"
-                            className="rounded-full hover:bg-background/80"
-                            onClick={() =>
-                              updateQuantity(item.product.id, item.quantity + 1)
-                            }
-                          >
-                            <Plus className="size-3.5" />
+                            <Trash2 className="size-4" />
                           </Button>
                         </div>
 
-                        <Button
-                          variant="ghost"
-                          size="icon-xs"
-                          className="text-muted-foreground/30 hover:text-destructive hover:bg-destructive/10 transition-all"
-                          onClick={() => removeFromCart(item.product.id)}
-                        >
-                          <Trash2 className="size-4" />
-                        </Button>
+                        {/* Collapsible Observation */}
+                        <Collapsible className="w-full">
+                          <CollapsibleTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              className="w-fit h-auto p-0 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 hover:text-primary hover:bg-transparent"
+                            >
+                              {item.observation
+                                ? "Edit Observation"
+                                : "+ Add Observation"}
+                            </Button>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent className="pt-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                            <input
+                              type="text"
+                              placeholder="Add special instructions (e.g., no onions)..."
+                              value={item.observation || ""}
+                              onChange={(e) =>
+                                updateObservation(item.product.id, e.target.value)
+                              }
+                              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-primary/50 transition-all font-medium"
+                            />
+                          </CollapsibleContent>
+                        </Collapsible>
                       </div>
                     ))}
                   </div>

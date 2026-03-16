@@ -71,3 +71,16 @@ export default defineConfig([
   },
 ])
 ```
+
+## Features
+
+### Offline Queue
+The Web Client includes a robust, automated Offline Order Queue system that ensures users never lose an order due to network instability.
+
+**How it works:**
+1. **Network Failure Interception**: When a user clicks "Place Grand Order", the application attempts to send the order to the backend API. If the request fails specifically due to a network connectivity issue (not an intentional API validation rejection), the system intercepts the error.
+2. **Local Storage Persistence**: Instead of discarding the order, the system packages the order data along with a unique identifier and timestamp, then saves it to the browser's `localStorage`. This ensures the order is safely preserved even if the user closes the tab or restarts their browser.
+3. **Online Event Listener**: The application actively listens for the browser's native `online` event (which fires when the device reconnects to a network).
+4. **Background Processing**: As soon as the connection is restored, the Offline Queue service automatically triggers a retry for all pending orders in the background.
+5. **Seamless Real-time Handoff**: When a queued order is successfully sent to the server, the service triggers an event. If the user is currently viewing the Cart, the UI intercepts this event and automatically establishes a WebSocket subscription for that specific order. The cart transitions back into its "Waiting" state, offering the exact same real-time feedback experience as a standard, online order.
+6. **Queue Cleanup**: Upon a successful API submission, the order is permanently removed from `localStorage` to prevent duplication. If an order encounters an actual API error during the retry (e.g., an item went out of stock while the user was offline), the queue handles it gracefully without getting stuck.

@@ -29,6 +29,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
+import { offlineOrderQueue } from "@/services/offlineOrderQueue";
 
 interface CartSheetProps {
   open: boolean;
@@ -56,6 +57,14 @@ export function CartSheet({ open, onOpenChange, clientId }: CartSheetProps) {
     }
   }, [result?.status, clearCart]);
 
+  // Subscribe to orders that were sent via the offline queue
+  useEffect(() => {
+    return offlineOrderQueue.onOrderSent((jobId) => {
+      subscribe(jobId);
+      setPlacing(true); // Show progress again if we're waiting for a socket result
+    });
+  }, [subscribe]);
+
   const handlePlaceOrder = useCallback(async () => {
     if (!clientId) {
       toast.error("No client selected. Please reload the page.");
@@ -64,21 +73,34 @@ export function CartSheet({ open, onOpenChange, clientId }: CartSheetProps) {
     if (items.length === 0) return;
 
     setPlacing(true);
+    const orderPayload = {
+      client_id: clientId,
+      order_products: items.map((i) => ({
+        product_id: i.product.id,
+        quantity: i.quantity,
+        observation: i.observation,
+      })),
+    };
+
     try {
-      const { job_id } = await api.placeOrder({
-        client_id: clientId,
-        order_products: items.map((i) => ({
-          product_id: i.product.id,
-          quantity: i.quantity,
-          observation: i.observation,
-        })),
-      });
+      const { job_id } = await api.placeOrder(orderPayload);
       subscribe(job_id);
     } catch (e) {
-      toast.error((e as Error).message);
+      console.error("[Cart] Failed to place order immediately:", e);
       setPlacing(false);
+
+      // If it's a network error (or anything that isn't a 4xx/5xx from API), queue it
+      // Note: apiFetch throws Error for !res.ok, so we can check if it's an "API error"
+      const errorMessage = (e as Error).message;
+
+      if (!errorMessage.includes("API error")) {
+        offlineOrderQueue.addOrder(orderPayload);
+        onOpenChange(false); // Close cart as it's now handled by the queue
+      } else {
+        toast.error(errorMessage);
+      }
     }
-  }, [clientId, items, subscribe]);
+  }, [clientId, items, subscribe, onOpenChange]);
 
   const handleDismissResult = () => {
     onOpenChange(false);
@@ -137,7 +159,9 @@ export function CartSheet({ open, onOpenChange, clientId }: CartSheetProps) {
               </div>
               <div className="space-y-3">
                 <h3 className="text-3xl font-black tracking-tight">
-                  {result.status === "confirm-order" ? "Exquisite!" : "Apologies"}
+                  {result.status === "confirm-order"
+                    ? "Exquisite!"
+                    : "Apologies"}
                 </h3>
                 <p className="text-muted-foreground text-lg max-w-[280px]">
                   {result.status === "confirm-order"
@@ -148,7 +172,9 @@ export function CartSheet({ open, onOpenChange, clientId }: CartSheetProps) {
 
                 {result.status === "failed" &&
                   result.ingredient_verification &&
-                  result.ingredient_verification.some((v) => !v.is_sufficient) && (
+                  result.ingredient_verification.some(
+                    (v) => !v.is_sufficient,
+                  ) && (
                     <div className="mt-6 w-full max-w-[320px] bg-destructive/5 border border-destructive/10 rounded-2xl p-4 text-left animate-in slide-in-from-bottom-4 duration-700">
                       <p className="text-[10px] font-black uppercase tracking-widest text-destructive/60 mb-3 ml-1">
                         Missing Ingredients
@@ -157,7 +183,10 @@ export function CartSheet({ open, onOpenChange, clientId }: CartSheetProps) {
                         {result.ingredient_verification
                           .filter((v) => !v.is_sufficient)
                           .map((v) => (
-                            <div key={v.input_id} className="flex flex-col gap-1">
+                            <div
+                              key={v.input_id}
+                              className="flex flex-col gap-1"
+                            >
                               <div className="flex items-center justify-between">
                                 <span className="text-sm font-bold text-foreground">
                                   {v.input_name}
@@ -166,7 +195,9 @@ export function CartSheet({ open, onOpenChange, clientId }: CartSheetProps) {
                                   variant="outline"
                                   className="text-[10px] bg-destructive/10 text-destructive border-none font-bold"
                                 >
-                                  -{v.required_quantity - v.stock_quantity_before}
+                                  -
+                                  {v.required_quantity -
+                                    v.stock_quantity_before}
                                 </Badge>
                               </div>
                               <div className="flex items-center gap-2 overflow-hidden">
@@ -179,7 +210,8 @@ export function CartSheet({ open, onOpenChange, clientId }: CartSheetProps) {
                                   />
                                 </div>
                                 <span className="text-[10px] font-medium text-muted-foreground/60 tabular-nums">
-                                  {v.stock_quantity_before}/{v.required_quantity}
+                                  {v.stock_quantity_before}/
+                                  {v.required_quantity}
                                 </span>
                               </div>
                             </div>
@@ -239,7 +271,10 @@ export function CartSheet({ open, onOpenChange, clientId }: CartSheetProps) {
                               size="icon-xs"
                               className="rounded-full hover:bg-background/80"
                               onClick={() =>
-                                updateQuantity(item.product.id, item.quantity - 1)
+                                updateQuantity(
+                                  item.product.id,
+                                  item.quantity - 1,
+                                )
                               }
                             >
                               <Minus className="size-3.5" />
@@ -252,7 +287,10 @@ export function CartSheet({ open, onOpenChange, clientId }: CartSheetProps) {
                               size="icon-xs"
                               className="rounded-full hover:bg-background/80"
                               onClick={() =>
-                                updateQuantity(item.product.id, item.quantity + 1)
+                                updateQuantity(
+                                  item.product.id,
+                                  item.quantity + 1,
+                                )
                               }
                             >
                               <Plus className="size-3.5" />
@@ -287,7 +325,10 @@ export function CartSheet({ open, onOpenChange, clientId }: CartSheetProps) {
                               placeholder="Add special instructions (e.g., no onions)..."
                               value={item.observation || ""}
                               onChange={(e) =>
-                                updateObservation(item.product.id, e.target.value)
+                                updateObservation(
+                                  item.product.id,
+                                  e.target.value,
+                                )
                               }
                               className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-primary/50 transition-all font-medium"
                             />

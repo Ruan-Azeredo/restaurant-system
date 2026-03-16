@@ -9,22 +9,6 @@ interface UseOrderSocketReturn {
   reset: () => void;
 }
 
-/**
- * React hook to subscribe to real-time order result notifications via WebSocket.
- *
- * Usage:
- * ```tsx
- * const { result, isWaiting, subscribe } = useOrderSocket();
- *
- * // After placing an order:
- * const { job_id } = await placeOrder(...);
- * subscribe(job_id);
- *
- * // result will be populated once the server processes it
- * if (result?.status === "confirmed") { ... }
- * if (result?.status === "rejected") { ... }
- * ```
- */
 export function useOrderSocket(): UseOrderSocketReturn {
   const [result, setResult] = useState<OrderResultPayload | null>(null);
   const [isWaiting, setIsWaiting] = useState(false);

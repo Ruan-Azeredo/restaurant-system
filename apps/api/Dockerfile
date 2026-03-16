@@ -60,14 +60,18 @@ WORKDIR /app
 ENV NODE_ENV=production
 RUN corepack enable && corepack prepare pnpm@9 --activate
 
-# Copia o package.json e dist ESPECÍFICOS da pasta da API
-COPY --from=builder /app/apps/api/package.json ./package.json
-COPY --from=builder /app/apps/api/dist ./dist
-
-# Instala apenas as dependências de produção.
-# Usamos o pnpm-lock.yaml do pruner para garantir versões corretas
+# 1. Copia o "esqueleto" do monorepo (pnpm-workspace.yaml, package.jsons)
+COPY --from=pruner /app/out/json/ .
 COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+
+# 2. Instala APENAS dependências de produção, respeitando o formato de workspace
 RUN pnpm install --prod --frozen-lockfile
+
+# 3. Copia o código compilado (dist) exatamente para onde ele deveria estar
+COPY --from=builder /app/apps/api/dist ./apps/api/dist
+
+# 4. Muda o foco do terminal para dentro da pasta da API
+WORKDIR /app/apps/api
 
 EXPOSE 3031
 

@@ -68,19 +68,19 @@ Ensure you have the following installed:
     pnpm install
     ```
 
-2.  **Infrastructure Setup**:
-    Start the required databases using Docker Compose:
-
-    ```bash
-    cd apps/api
-    docker-compose up -d
-    ```
-
-3.  **Environment Configuration**:
+2.  **Environment Configuration**:
     Configure the `.env` files in each application. You can refer to `.env.example` where available.
     - `apps/api/.env`: Set DB and Redis credentials.
     - `apps/web-client/.env`: Set `VITE_API_URL`.
     - `apps/web-admin/.env`: Set `VITE_API_URL`.
+
+3.  **Infrastructure Setup**:
+    Start the external services using Docker Compose:
+
+    ```bash
+    cd apps/api
+    docker-compose up db redis -d
+    ```
 
 4.  **Database Migrations**:
     Prepare the database schema:
@@ -96,6 +96,10 @@ Ensure you have the following installed:
     ```bash
     pnpm dev
     ```
+
+> **Note**: You can just run in /apps/api `docker-compose up -d` to setup all backend infrastructure. and run `pnpm dev` in each frontend directory to start the frontend applications.
+
+---
 
 - **API**: [http://localhost:3031](http://localhost:3031)
 - **Web Client**: [http://localhost:5173](http://localhost:5173)

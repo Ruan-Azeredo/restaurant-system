@@ -1,159 +1,102 @@
-# Turborepo starter
+# Production:
 
-This Turborepo starter is maintained by the Turborepo core team.
+- **API**: [https://tgssc48g4o0sk0wk0ww4cs4s.178.156.146.224.sslip.io](https://tgssc48g4o0sk0wk0ww4cs4s.178.156.146.224.sslip.io)
 
-## Using this example
+  > deployed backend, database and redis on coolify
 
-Run the following command:
+- **Web Client**: [https://restaurant-system-web-client.vercel.app](https://restaurant-system-web-client.vercel.app)
+- **Web Admin**: [https://restaurant-system-web-admin.vercel.app](https://restaurant-system-web-admin.vercel.app)
+  > deployed both frontends on vercel
 
-```sh
-npx create-turbo@latest
-```
+# Restaurant System Ecosystem
 
-## What's inside?
+A robust, real-time restaurant management ecosystem built with a modern monorepo architecture. This system streamlines the journey from customer ordering to kitchen management and administrative oversight.
 
-This Turborepo includes the following packages/apps:
+## 🌟 Project Vision
 
-### Apps and Packages
+The Restaurant System is designed to provide a seamless, high-performance experience for both customers and restaurant staff. By leveraging asynchronous job processing and real-time communication, the platform ensures that even during high-traffic periods, orders are managed reliably and status updates are delivered instantly.
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+## 🏗️ System Architecture
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+The project is structured as a **Turborepo monorepo**, ensuring consistency and shared tooling across multiple applications:
 
-### Utilities
+- **`apps/api`**: The central nervous system. A Node.js API that handles data persistence, manages the order queue, and facilitates real-time communication via WebSockets.
+- **`apps/web-client`**: The customer-facing interface. A sleek, responsive web application for browsing products, managing a cart, and tracking order progress in real-time. It includes an offline-first queue to ensure orders are never lost during connectivity drops.
+- **`apps/web-admin`**: The administrative dashboard. A specialized view for restaurant staff to monitor incoming orders, manage inventory, and update order statuses.
 
-This Turborepo has some additional tools already setup for you:
+## 🚀 Key Features
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+- **Asynchronous Order Processing**: High-reliability ordering system using **BullMQ** and **Redis** to prevent data loss and handle background processing.
+- **Real-time Synchronization**: Instant updates across all clients (Admin and Customers) using **Socket.IO**.
+- **Ingredient Verification**: Intelligent inventory management that automatically verifies stock levels before confirming an order.
+- **Offline Reliability**: The web client buffers failed orders in `localStorage` and automatically retries them when connectivity returns.
+- **Modular Design**: Clean Architecture principles applied to the backend for high maintainability.
 
-### Build
+## 🛠️ Tech Stack
 
-To build all apps and packages, run the following command:
+### Backend (`apps/api`)
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+- **Core**: Node.js, Express
+- **Database**: PostgreSQL with Sequelize ORM
+- **Queue**: BullMQ, Redis
+- **Real-time**: Socket.IO
+- **Language**: TypeScript
 
-```sh
-cd my-turborepo
-turbo build
-```
+### Frontend (`apps/web-client` & `apps/web-admin`)
 
-Without global `turbo`, use your package manager:
+- **Core**: React, Vite
+- **Styling**: Tailwind CSS, Shadcn/UI
+- **State Management**: React Hooks, Context API
+- **Real-time**: Socket.IO Client
+- **Language**: TypeScript
 
-```sh
-cd my-turborepo
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
+## 💻 Local Development
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+### Prerequisites
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+Ensure you have the following installed:
 
-```sh
-turbo build --filter=docs
-```
+- **Node.js**: >= 18
+- **pnpm**: `npm install -g pnpm`
+- **Docker**: For running Postgres and Redis easily.
 
-Without global `turbo`:
+### Setup Instructions
 
-```sh
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+1.  **Clone and Install Dependencies**:
 
-### Develop
+    ```bash
+    pnpm install
+    ```
 
-To develop all apps and packages, run the following command:
+2.  **Infrastructure Setup**:
+    Start the required databases using Docker Compose:
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+    ```bash
+    cd apps/api
+    docker-compose up -d
+    ```
 
-```sh
-cd my-turborepo
-turbo dev
-```
+3.  **Environment Configuration**:
+    Configure the `.env` files in each application. You can refer to `.env.example` where available.
+    - `apps/api/.env`: Set DB and Redis credentials.
+    - `apps/web-client/.env`: Set `VITE_API_URL`.
+    - `apps/web-admin/.env`: Set `VITE_API_URL`.
 
-Without global `turbo`, use your package manager:
+4.  **Database Migrations**:
+    Prepare the database schema:
 
-```sh
-cd my-turborepo
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
+    ```bash
+    cd apps/api
+    pnpm migrate
+    pnpm seed
+    ```
 
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+5.  **Run the System**:
+    From the **root directory**, start all applications in development mode:
+    ```bash
+    pnpm dev
+    ```
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo dev --filter=web
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+- **API**: [http://localhost:3031](http://localhost:3031)
+- **Web Client**: [http://localhost:5173](http://localhost:5173)
+- **Web Admin**: [http://localhost:5174](http://localhost:5174)
